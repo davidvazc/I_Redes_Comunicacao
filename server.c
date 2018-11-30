@@ -143,6 +143,7 @@ void process_client(int client_fd)
     struct sockaddr_in addr, client_addr2;
     int nread = 0;
     char id_client[BUF_SIZE];
+    int client_addr_size2;
     int noti_fd;
     char buffer[BUF_SIZE];
     write(client_fd,"Seja bem vindo ao servidor Isabela!",BUF_SIZE);
@@ -150,6 +151,12 @@ void process_client(int client_fd)
     faz_client();
     cria_grupo();
     nread = read(client_fd, id_client, BUF_SIZE);
+     if ( (noti_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        erro("na funcao socket");
+    if ( bind(noti_fd,(struct sockaddr*)&addr,sizeof(addr)) < 0)
+        erro("na funcao bind");
+    if( listen(noti_fd, 5) < 0)
+        erro("na funcao listen");
     client_addr_size2 = sizeof(client_addr2);
     noti = accept(noti_fd,(struct sockaddr *)&client_addr2,(socklen_t *)&client_addr_size2);
 	
