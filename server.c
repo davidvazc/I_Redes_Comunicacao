@@ -27,12 +27,18 @@ typedef struct{
 	char atividade[BUF_SIZE];
 	char localizacao[BUF_SIZE];
 	int call_duracao;
+	bool sub_call_duracao;
 	int call_feitas;
+	bool sub_call_feitas;
 	int call_perdidas;
+	bool sub_call_perdidas;
 	int call_recebidas;
+	bool sub_call_recebidas;
 	char departamento[BUF_SIZE];
 	int sms_recebidas;
+	bool sub_sms_recebidas;
 	int sms_enviadas;
+	bool sub_sms_enviadas;
 }Client;
 
 Client *total_pessoas[BUF_SIZE];
@@ -46,22 +52,34 @@ void faz_client(Client total_pessoas[]){
 	strcpy(cl1.departamento, "DEM");
 	strcpy(cl1.id , "teste1");
 	cl1.calls_feitas = 7;
+	cl1.sub_calls_feitas=false;
   	cl1.call_duracao = 2;
+	cl1.sub_calls_duracao=false;
   	cl1.call_perdidas = 1;
+	cl1.sub_call_perdidas=false;
   	cl1.call_recebidas = 5;
+	cl1.sub_call_recebidas=false;
  	cl1.sms_recebidas = 6;
+	cl1.sub_sms_recebidas=false;
   	cl1.sms_enviadas = 6;
+	cl1.sub_sms_enviadas=false;
 
   	strcpy(cl2.atividade, "Bebendo");
   	strcpy(cl2.localizacao, "Brazil");
   	strcpy(cl2.departamento, "DEI");
   	strcpy(cl2.id , "teste2");
   	cl2.calls_feitas = 5;
+	cl2.sub_calls_feitas=false;
   	cl2.calls_duracao = 3;
+	cl2.sub_calls_duracao=false;
   	cl2.calls_perdidas = 3;
+	cl2.sub_calls_perdidas=false;
   	cl2.calls_recebidas = 10;
+	cl2.sub_calls_recebidas=false;
   	cl2.sms_recebidas = 4;
+	cl2.sub_sms_recebidas=false;
   	cl2.sms_enviadas =5;
+	cl2.sub_sms_enviadas=false;
 
   	*total_pessoas[0] = cl1;
   	*total_pessoas[1] = cl2;
@@ -220,6 +238,83 @@ void media_grupo(int client_fd){
   	write(client_fd, "SMS enviadas: "+ssms_enviadas, BUF_SIZE);
   	write(client_fd, "SMS recebidas: "+ssms_recebidas, BUF_SIZE);
 
+}
+
+
+void subscricoes(int client_fd,char id_client[]){
+	int i;
+	int nread=0;
+	char buffer[BUF_SIZE];
+	while(strcmp(*total_pessoas[i].id,id_client)!=0 && i<BUF_SIZE){
+		i++;
+	}
+	write(client_fd,"Escolha um dado que queira subscrever/cancelar:\n1.Chamadas recebidas.\n2.Chamadas feitas.\n3.Chamadas perdidas\n4.Duração media de chamada.\n5.SMS enviados.\n6.SMS recebidos.\n",BUF_SIZE);
+	nread=read(client_fd,buffer,BUF_SIZE);
+	buffer[nread]='\0';
+	do{
+	if(strcmp(buffer,'1')==0){
+		if(*total_pessoas[i].sub_calls_recebidas==false){
+			*total_pessoas[i].sub_calls_recebidas=true;
+		}
+		else{
+			*total_pessoas[i].sub_calls_recebidas=false;
+		
+		}
+	}
+	else if(strcmp(buffer,'2')==0){
+		if(*total_pessoas[i].sub_calls_feitas==false){
+			*total_pessoas[i].sub_calls_feitas=true;
+		}
+		else{
+			*total_pessoas[i].sub_calls_feitas=false
+		
+		}
+	}
+	else if(strcmp(buffer,'3')==0){
+		if(*total_pessoas[i].sub_calls_perdidas==false){
+			*total_pessoas[i].sub_calls_perdidas=true;
+		}
+		else{
+			*total_pessoas[i].sub_calls_perdidas=false;
+		
+		}
+		
+	}
+	else if(strcmp(buffer,'4')==0){
+		if(*total_pessoas[i].sub_calls_duracao==false){
+			*total_pessoas[i].sub_calls_duracao=true;
+			
+		}
+		else{
+			*total_pessoas[i].sub_calls_duracao=false;
+		
+		}
+		
+	}
+	else if(strcmp(buffer,'5')==0){
+		if(*total_pessoas[i].sub_sms_enviadas==false){
+			*total_pessoas[i].sub_sms_enviadas=true;
+		}
+		else{
+			*total_pessoas[i].sub_sms_enviadas=false;
+		
+		}
+		
+	}
+	else if(strcmp(buffer,'6')==0){
+		if(*total_pessoas[i].sub_sms_recebidas==false){
+			*total_pessoas[i].sub_sms_recebidas=true;
+		}
+		else{
+			*total_pessoas[i].sub_sms_recebidas=false;
+		
+		}
+		
+	}
+	else{
+		write(client_fd,"Essa opção não existe.",BUF_SIZE);
+	}
+	}while(strcmp(buffer,'6')!=0 && strcmp(buffer,'5')!=0 && strcmp(buffer,'4')!=0 && strcmp(buffer,'3')!=0 && strcmp(buffer,'2')!=0 && strcmp(buffer,'1')!=0);
 }
 
 void erro(char *msg)
