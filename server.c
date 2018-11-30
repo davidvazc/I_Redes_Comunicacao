@@ -153,11 +153,14 @@ void process_client(int client_fd)
     client_addr_size2 = sizeof(client_addr2);
     noti = accept(noti_fd,(struct sockaddr *)&client_addr2,(socklen_t *)&client_addr_size2);
 	
+    if(noti>0){
 	if(fork()==0){
+		close(noti_fd);
 		notificacoes(noti,id_client);
 		exit(0);
 	}
 	close(noti);
+    }
     
     
     while(!(strcmp(buffer,"SAIR")==0)){
