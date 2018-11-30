@@ -190,7 +190,6 @@ void envia_info(int client_fd,char id_client[]){
 
 //Media do grupo
 void media_grupo(int client_fd){
-	Cliente media;
 	double total_calls_duracao = 0;
   	double total_calls_feitas = 0;
  	double total_calls_perdidas = 0;
@@ -255,59 +254,65 @@ void subscricoes(int client_fd,char id_client[]){
 	if(strcmp(buffer,'1')==0){
 		if(*total_pessoas[i].sub_calls_recebidas==false){
 			*total_pessoas[i].sub_calls_recebidas=true;
+			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
 			*total_pessoas[i].sub_calls_recebidas=false;
+			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		
 		}
 	}
 	else if(strcmp(buffer,'2')==0){
 		if(*total_pessoas[i].sub_calls_feitas==false){
 			*total_pessoas[i].sub_calls_feitas=true;
+			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
 			*total_pessoas[i].sub_calls_feitas=false
-		
+			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		}
 	}
 	else if(strcmp(buffer,'3')==0){
 		if(*total_pessoas[i].sub_calls_perdidas==false){
 			*total_pessoas[i].sub_calls_perdidas=true;
+			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
 			*total_pessoas[i].sub_calls_perdidas=false;
-		
+			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		}
 		
 	}
 	else if(strcmp(buffer,'4')==0){
 		if(*total_pessoas[i].sub_calls_duracao==false){
 			*total_pessoas[i].sub_calls_duracao=true;
-			
+			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
 			*total_pessoas[i].sub_calls_duracao=false;
-		
+			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		}
 		
 	}
 	else if(strcmp(buffer,'5')==0){
 		if(*total_pessoas[i].sub_sms_enviadas==false){
 			*total_pessoas[i].sub_sms_enviadas=true;
+			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
 			*total_pessoas[i].sub_sms_enviadas=false;
-		
+			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		}
 		
 	}
 	else if(strcmp(buffer,'6')==0){
 		if(*total_pessoas[i].sub_sms_recebidas==false){
 			*total_pessoas[i].sub_sms_recebidas=true;
+			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
 			*total_pessoas[i].sub_sms_recebidas=false;
-		
+			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		}
 		
 	}
@@ -315,6 +320,12 @@ void subscricoes(int client_fd,char id_client[]){
 		write(client_fd,"Essa opção não existe.",BUF_SIZE);
 	}
 	}while(strcmp(buffer,'6')!=0 && strcmp(buffer,'5')!=0 && strcmp(buffer,'4')!=0 && strcmp(buffer,'3')!=0 && strcmp(buffer,'2')!=0 && strcmp(buffer,'1')!=0);
+}
+
+void notificacoes(int client_fd,char id_client[]){
+	
+	
+	
 }
 
 void erro(char *msg)
