@@ -12,6 +12,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
+#include <stdbool.h>
 
 
 #define BUF_SIZE    1024
@@ -41,48 +42,44 @@ typedef struct{
 	bool sub_sms_enviadas;
 }Client;
 
-Client *total_pessoas[BUF_SIZE];
+Client total_pessoas[BUF_SIZE];
 
 void faz_client(Client total_pessoas[]){
-	Client cl1;
-	Client cl2;
+    
 
-	strcpy(cl1.atividade, "Estudando");
-	strcpy(cl1.localizacao, "Portugal");
-	strcpy(cl1.departamento, "DEM");
-	strcpy(cl1.id , "teste1");
-	cl1.calls_feitas = 7;
-	cl1.sub_calls_feitas=false;
-  	cl1.call_duracao = 2;
-	cl1.sub_calls_duracao=false;
-  	cl1.call_perdidas = 1;
-	cl1.sub_call_perdidas=false;
-  	cl1.call_recebidas = 5;
-	cl1.sub_call_recebidas=false;
- 	cl1.sms_recebidas = 6;
-	cl1.sub_sms_recebidas=false;
-  	cl1.sms_enviadas = 6;
-	cl1.sub_sms_enviadas=false;
+    strcpy(total_pessoas[0].atividade, "Estudando");
+    strcpy(total_pessoas[0].localizacao, "Portugal");
+    strcpy(total_pessoas[0].departamento, "DEM");
+	strcpy(total_pessoas[0].id , "teste1");
+    total_pessoas[0].call_feitas = 7;
+    total_pessoas[0].sub_call_feitas=false;
+  	total_pessoas[0].call_duracao = 2;
+    total_pessoas[0].sub_call_duracao=false;
+  	total_pessoas[0].call_perdidas = 1;
+	total_pessoas[0].sub_call_perdidas=false;
+  	total_pessoas[0].call_recebidas = 5;
+	total_pessoas[0].sub_call_recebidas=false;
+ 	total_pessoas[0].sms_recebidas = 6;
+	total_pessoas[0].sub_sms_recebidas=false;
+  	total_pessoas[0].sms_enviadas = 6;
+	total_pessoas[0].sub_sms_enviadas=false;
 
-  	strcpy(cl2.atividade, "Bebendo");
-  	strcpy(cl2.localizacao, "Brazil");
-  	strcpy(cl2.departamento, "DEI");
-  	strcpy(cl2.id , "teste2");
-  	cl2.calls_feitas = 5;
-	cl2.sub_calls_feitas=false;
-  	cl2.calls_duracao = 3;
-	cl2.sub_calls_duracao=false;
-  	cl2.calls_perdidas = 3;
-	cl2.sub_calls_perdidas=false;
-  	cl2.calls_recebidas = 10;
-	cl2.sub_calls_recebidas=false;
-  	cl2.sms_recebidas = 4;
-	cl2.sub_sms_recebidas=false;
-  	cl2.sms_enviadas =5;
-	cl2.sub_sms_enviadas=false;
-
-  	*total_pessoas[0] = cl1;
-  	*total_pessoas[1] = cl2;
+  	strcpy(total_pessoas[1].atividade, "Bebendo");
+  	strcpy(total_pessoas[1].localizacao, "Brazil");
+  	strcpy(total_pessoas[1].departamento, "DEI");
+  	strcpy(total_pessoas[1].id , "teste2");
+    total_pessoas[1].call_feitas = 5;
+    total_pessoas[1].sub_call_feitas=false;
+    total_pessoas[1].call_duracao = 3;
+    total_pessoas[1].sub_call_duracao=false;
+    total_pessoas[1].call_perdidas = 3;
+    total_pessoas[1].sub_call_perdidas=false;
+    total_pessoas[1].call_recebidas = 10;
+    total_pessoas[1].sub_call_recebidas=false;
+  	total_pessoas[1].sms_recebidas = 4;
+	total_pessoas[1].sub_sms_recebidas=false;
+  	total_pessoas[1].sms_enviadas =5;
+	total_pessoas[1].sub_sms_enviadas=false;
 
 }
 
@@ -136,17 +133,13 @@ void process_client(int client_fd)
     char buffer[BUF_SIZE];
     write(client_fd,"Seja bem vindo ao servidor Isabela!",BUF_SIZE);
     write(client_fd,"Introduza o ID da isabela: ",BUF_SIZE);
-    faz_client(&total_pessoas[]);
+    faz_client(&total_pessoas[BUF_SIZE]);
     
     while(!(strcmp(buffer,"SAIR")==0)){
         write(client_fd,"Introduza mensagem: ",BUF_SIZE);
         nread = read(client_fd, buffer, BUF_SIZE);
         buffer[nread] = '\0';
         printf("%s\n", buffer);
-        
-        
-        
-        
         
     }
     
@@ -158,32 +151,34 @@ void process_client(int client_fd)
 
 //envia dados do cliente pretendido
 void envia_info(int client_fd,char id_client[]){
+    
 	int i=0;	
-	char scalls_feitas[BUF_SIZE];
-	char scalls_duracao[BUF_SIZE];
-	char scalls_perdidas[BUF_SIZE];
-	char scalls_recebidas[BUF_SIZE];
-	char ssms_recebidas[BUF_SIZE];
-	char ssms_enviadas[BUF_SIZE];
-	while(strcmp(*total_pessoas[i].id,id_client)!=0 && i<BUF_SIZE){
+	char scalls_feitas[BUF_SIZE],scalls_duracao[BUF_SIZE],scalls_perdidas[BUF_SIZE],scalls_recebidas[BUF_SIZE];
+    char ssms_recebidas[BUF_SIZE],ssms_enviadas[BUF_SIZE],sdepartamento[BUF_SIZE], slocalizacao[BUF_SIZE];
+    char sAtividade[BUF_SIZE];
+	while(strcmp(total_pessoas[i].id,id_client)!=0 && i<BUF_SIZE){
 	i++;
 	}
-	sprintf(scalls_feitas,"%d",*total_pessoas[i].calls_feitas);
-	sprintf(scalls_duracao,"%d",*total_pessoas[i].calls_duracao);
-	sprintf(scalls_perdidas,"%d",*total_pessoas[i].calls_perdidas);
-	sprintf(scalls_recebidas,"%d",*total_pessoas[i].calls_recebidas);
-	sprintf(ssms_recebidas,"%d",*total_pessoas[i].sms_recebidas);
-	sprintf(ssms_enviadas,"%d",*total_pessoas[i].sms_enviadas);
-	write(client_fd,"Id: "+*total_pessoas[i].id,BUF_SIZE);
-	write(client_fd,"Atividade: "+*total_pessoas[i].atividade,BUF_SIZE);
-	write(client_fd,"Localização: "+*total_pessoas[i].localizacao,BUF_SIZE);
-	write(client_fd,"Departamento: "+*total_pessoas[i].departamento,BUF_SIZE);
-	write(client_fd,"Chamadas feitas: "+scalls_feitas,BUF_SIZE);
-	write(client_fd,"Duração chamadas: "+scalls_duracao,BUF_SIZE);
-	write(client_fd,"Chamadas perdidas: "+scalls_perdidas,BUF_SIZE);
-	write(client_fd,"Chamadas recebidas: "+scalls_recebidas,BUF_SIZE);
-  	write(client_fd,"SMS recebidas: "+ssms_recebidas,BUF_SIZE);
-  	write(client_fd,"SMS enviadas: "+ssms_enviadas,BUF_SIZE);
+    
+    sprintf(sAtividade,"Actividade:%s",total_pessoas[i].atividade);
+    sprintf(slocalizacao,"Localização:%s",total_pessoas[i].localizacao);
+    sprintf(sdepartamento,"Departamento:%s",total_pessoas[i].departamento);
+    sprintf(scalls_feitas,"Chamadas feitas:%d",total_pessoas[i].call_feitas);
+    sprintf(scalls_duracao,"Duração chamadas:%d",total_pessoas[i].call_duracao);
+    sprintf(scalls_perdidas,"Chamadas perdidas: %d",total_pessoas[i].call_perdidas);
+    sprintf(scalls_recebidas,"Chamadas recebidas: %d",total_pessoas[i].call_recebidas);
+	sprintf(ssms_recebidas,"SMS recebidas: %d",total_pessoas[i].sms_recebidas);
+	sprintf(ssms_enviadas,"SMS enviadas: %d",total_pessoas[i].sms_enviadas);
+	
+	write(client_fd,sAtividade,BUF_SIZE);
+	write(client_fd,slocalizacao,BUF_SIZE);
+	write(client_fd,sdepartamento,BUF_SIZE);
+	write(client_fd,scalls_feitas,BUF_SIZE);
+	write(client_fd,scalls_duracao,BUF_SIZE);
+	write(client_fd,scalls_perdidas,BUF_SIZE);
+	write(client_fd,scalls_recebidas,BUF_SIZE);
+  	write(client_fd,ssms_recebidas,BUF_SIZE);
+  	write(client_fd,ssms_enviadas,BUF_SIZE);
 
 }
 
@@ -199,12 +194,12 @@ void media_grupo(int client_fd){
 	
 	//somar
 	for(int i=0;i<N_USERS;i++){
-		total_calls_duracao+=*total_pessoas[i].calls_duracao;
-		total_calls_feitas+=*total_pessoas[i].calls_feitas;
-		total_calls_perdidas+=*total_pessoas[i].calls_perdidas;
-		total_calls_recebidas+=*total_pessoas[i].calls_recebidas;
-		total_sms_recebidas+=*total_pessoas[i].sms_recebidas;
-		total_sms_enviadas+=*total_pessoas[i].sms_enviadas;
+        total_calls_duracao+=total_pessoas[i].call_duracao;
+        total_calls_feitas+=total_pessoas[i].call_feitas;
+        total_calls_perdidas+=total_pessoas[i].call_perdidas;
+        total_calls_recebidas+=total_pessoas[i].call_recebidas;
+		total_sms_recebidas+=total_pessoas[i].sms_recebidas;
+		total_sms_enviadas+=total_pessoas[i].sms_enviadas;
 	}
 	//Media
 	double media_calls_duracao=total_calls_duracao/N_USERS;
@@ -222,96 +217,96 @@ void media_grupo(int client_fd){
   	char ssms_recebidas[BUF_SIZE];
   	char ssms_enviadas[BUF_SIZE];
 
-  	sprintf(scalls_recebidas, "%f", media_calls_recebidas);
-  	sprintf(scalls_feitas, "%f", media_calls_feitas);
-  	sprintf(scalls_perdidas, "%f", media_calls_perdidas);
-  	sprintf(scalls_duracao, "%f", media_calls_duracao);
-  	sprintf(ssms_enviadas, "%f", media_sms_enviadas);
-  	sprintf(ssms_recebidas, "%f", media_sms_recebidas);
+  	sprintf(scalls_recebidas, "Media chamadas recebidas: %f", media_calls_recebidas);
+  	sprintf(scalls_feitas, "Media chamadas feitas: %f", media_calls_feitas);
+  	sprintf(scalls_perdidas, "Media chamadas perdidas: %f", media_calls_perdidas);
+  	sprintf(scalls_duracao, "Duração media de chamada: %f", media_calls_duracao);
+  	sprintf(ssms_enviadas, "SMS enviadas: %f", media_sms_enviadas);
+  	sprintf(ssms_recebidas, "SMS recebidas: %f", media_sms_recebidas);
 	
 	//Envia para cliente
-  	write(client_fd, "Media chamadas recebidas: "+scalls_recebidas, BUF_SIZE);
- 	write(client_fd, "Media chamadas feitas: "+scalls_feitas, BUF_SIZE);
-  	write(client_fd, "Media chamadas perdidas: "+scalls_perdidas, BUF_SIZE);
-  	write(client_fd, "Duração media de chamada: "+scalls_duracao, BUF_SIZE);
-  	write(client_fd, "SMS enviadas: "+ssms_enviadas, BUF_SIZE);
-  	write(client_fd, "SMS recebidas: "+ssms_recebidas, BUF_SIZE);
+  	write(client_fd,scalls_recebidas, BUF_SIZE);
+ 	write(client_fd,scalls_feitas, BUF_SIZE);
+  	write(client_fd,scalls_perdidas, BUF_SIZE);
+  	write(client_fd,scalls_duracao, BUF_SIZE);
+  	write(client_fd,ssms_enviadas, BUF_SIZE);
+  	write(client_fd,ssms_recebidas, BUF_SIZE);
 
 }
 
 
 void subscricoes(int client_fd,char id_client[]){
-	int i;
+    int i = 0;
 	int nread=0;
 	char buffer[BUF_SIZE];
-	while(strcmp(*total_pessoas[i].id,id_client)!=0 && i<BUF_SIZE){
+    while(strcmp(total_pessoas[i].id,id_client)!=0 && i<BUF_SIZE){
 		i++;
 	}
 	write(client_fd,"Escolha um dado que queira subscrever/cancelar:\n1.Chamadas recebidas.\n2.Chamadas feitas.\n3.Chamadas perdidas\n4.Duração media de chamada.\n5.SMS enviados.\n6.SMS recebidos.\n",BUF_SIZE);
 	nread=read(client_fd,buffer,BUF_SIZE);
 	buffer[nread]='\0';
 	do{
-	if(strcmp(buffer,'1')==0){
-		if(*total_pessoas[i].sub_calls_recebidas==false){
-			*total_pessoas[i].sub_calls_recebidas=true;
+	if(strcmp(buffer,"1")==0){
+        if(total_pessoas[i].sub_call_recebidas==false){
+            total_pessoas[i].sub_call_recebidas=true;
 			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
-			*total_pessoas[i].sub_calls_recebidas=false;
+            total_pessoas[i].sub_call_recebidas=false;
 			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		
 		}
 	}
-	else if(strcmp(buffer,'2')==0){
-		if(*total_pessoas[i].sub_calls_feitas==false){
-			*total_pessoas[i].sub_calls_feitas=true;
+	else if(strcmp(buffer,"2")==0){
+        if(total_pessoas[i].sub_call_feitas==false){
+            total_pessoas[i].sub_call_feitas=true;
 			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
-			*total_pessoas[i].sub_calls_feitas=false
+            total_pessoas[i].sub_call_feitas=false;
 			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		}
 	}
-	else if(strcmp(buffer,'3')==0){
-		if(*total_pessoas[i].sub_calls_perdidas==false){
-			*total_pessoas[i].sub_calls_perdidas=true;
+	else if(strcmp(buffer,"3")==0){
+        if(total_pessoas[i].sub_call_perdidas==false){
+            total_pessoas[i].sub_call_perdidas=true;
 			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
-			*total_pessoas[i].sub_calls_perdidas=false;
-			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
-		}
-		
-	}
-	else if(strcmp(buffer,'4')==0){
-		if(*total_pessoas[i].sub_calls_duracao==false){
-			*total_pessoas[i].sub_calls_duracao=true;
-			write(client_fd,"Está agora subscrito.",BUF_SIZE);
-		}
-		else{
-			*total_pessoas[i].sub_calls_duracao=false;
+            total_pessoas[i].sub_call_perdidas=false;
 			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		}
 		
 	}
-	else if(strcmp(buffer,'5')==0){
-		if(*total_pessoas[i].sub_sms_enviadas==false){
-			*total_pessoas[i].sub_sms_enviadas=true;
+	else if(strcmp(buffer,"4")==0){
+        if(total_pessoas[i].sub_call_duracao==false){
+            total_pessoas[i].sub_call_duracao=true;
 			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
-			*total_pessoas[i].sub_sms_enviadas=false;
+            total_pessoas[i].sub_call_duracao=false;
 			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		}
 		
 	}
-	else if(strcmp(buffer,'6')==0){
-		if(*total_pessoas[i].sub_sms_recebidas==false){
-			*total_pessoas[i].sub_sms_recebidas=true;
+	else if(strcmp(buffer,"5")==0){
+		if(total_pessoas[i].sub_sms_enviadas==false){
+			total_pessoas[i].sub_sms_enviadas=true;
 			write(client_fd,"Está agora subscrito.",BUF_SIZE);
 		}
 		else{
-			*total_pessoas[i].sub_sms_recebidas=false;
+			total_pessoas[i].sub_sms_enviadas=false;
+			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
+		}
+		
+	}
+	else if(strcmp(buffer,"6")==0){
+		if(total_pessoas[i].sub_sms_recebidas==false){
+			total_pessoas[i].sub_sms_recebidas=true;
+			write(client_fd,"Está agora subscrito.",BUF_SIZE);
+		}
+		else{
+			total_pessoas[i].sub_sms_recebidas=false;
 			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
 		}
 		
@@ -319,7 +314,7 @@ void subscricoes(int client_fd,char id_client[]){
 	else{
 		write(client_fd,"Essa opção não existe.",BUF_SIZE);
 	}
-	}while(strcmp(buffer,'6')!=0 && strcmp(buffer,'5')!=0 && strcmp(buffer,'4')!=0 && strcmp(buffer,'3')!=0 && strcmp(buffer,'2')!=0 && strcmp(buffer,'1')!=0);
+	}while(strcmp(buffer,"6")!=0 && strcmp(buffer,"5")!=0 && strcmp(buffer,"4")!=0 && strcmp(buffer,"3")!=0 && strcmp(buffer,"2")!=0 && strcmp(buffer,"1")!=0);
 }
 
 void notificacoes(int client_fd,char id_client[]){
