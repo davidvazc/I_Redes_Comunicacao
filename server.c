@@ -157,6 +157,7 @@ void process_client(int client_fd)
 		notificacoes(noti,id_client);
 		exit(0);
 	}
+	close(noti);
     
     
     while(!(strcmp(buffer,"SAIR")==0)){
