@@ -140,6 +140,7 @@ int main() {
 
 void process_client(int client_fd)
 {
+    struct sockaddr_in addr, client_addr2;
     int nread = 0;
     char id_client[BUF_SIZE];
     int noti_fd;
@@ -149,9 +150,11 @@ void process_client(int client_fd)
     faz_client();
     cria_grupo();
     nread = read(client_fd, id_client, BUF_SIZE);
+    client_addr_size2 = sizeof(client_addr2);
+    noti = accept(noti_fd,(struct sockaddr *)&client_addr2,(socklen_t *)&client_addr_size2);
 	
 	if(fork()==0){
-		notificacoes(noti_fd,id_client);
+		notificacoes(noti,id_client);
 		exit(0);
 	}
     
