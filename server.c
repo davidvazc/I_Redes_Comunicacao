@@ -16,8 +16,9 @@
 
 
 #define BUF_SIZE    1024
-#define SERVER_PORT     9000
+#define SERVER_PORT     9001
 #define N_USERS   2
+#define NMEDIA  6
 
 
 
@@ -48,6 +49,7 @@ typedef struct{
 
 Client total_pessoas[BUF_SIZE];
 int nr_clientes;
+double media[NMEDIA];
 
 void faz_client(){
     strcpy(total_pessoas[0].atividade, "Estudando");
@@ -87,7 +89,24 @@ void faz_client(){
     nr_clientes++;
 }
 
-
+void calcula_media(){
+    //somar
+    for(int i=0;i<N_USERS;i++){
+        media[0]+=total_pessoas[i].call_feitas;
+        media[1]+=total_pessoas[i].call_duracao;
+        media[2]+=total_pessoas[i].call_perdidas;
+        media[3]+=total_pessoas[i].call_recebidas;
+        media[4]+=total_pessoas[i].sms_recebidas;
+        media[5]+=total_pessoas[i].sms_enviadas;
+    }
+    //Media
+    media[0]=media[0]/N_USERS;
+    media[1]=media[1]/N_USERS;
+    media[2]=media[2]/N_USERS;
+    media[3]=media[3]/N_USERS;
+    media[4]=media[4]/N_USERS;
+    media[5]=media[5]/N_USERS;
+}
 
 int main() {
     
@@ -95,17 +114,27 @@ int main() {
     struct sockaddr_in addr, client_addr;
     int client_addr_size;
     
+//    cria estrutura
     bzero((void *) &addr, sizeof(addr));
+    
+    // Configure settings of the server address struct
+    // Address family = Internet
     addr.sin_family = AF_INET;
+    //Set IP address to localhost
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    //Set port number, using htons function to use proper byte order
     addr.sin_port = htons(SERVER_PORT);
     
+    //Create the socket.
     if ( (fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         erro("na funcao socket");
+    //Bind the address struct to the socket
     if ( bind(fd,(struct sockaddr*)&addr,sizeof(addr)) < 0)
         erro("na funcao bind");
+    //Listen on the socket, with 5 max connection requests queued
     if( listen(fd, 5) < 0)
         erro("na funcao listen");
+    
     faz_client();
     
     while (1) {
@@ -120,17 +149,43 @@ int main() {
             if (fork() == 0) {
                 close(fd);
                 process_client(client);
-                close(client);
                 exit(0);
             }
+            close(client);
         }
     }
-//    close(fd);
-//    exit(0);
     return 0;
 }
 
 void process_client(int client_fd){
+    /*
+//      CRIADO POR TIq
+    struct sockaddr_in addr, client_addr2;
+    long nreadSUB = 0;
+    char id_client[BUF_SIZE];
+    int client_addr_size2;
+    int noti_fd;
+    calcula_media();
+    
+    if ( (noti_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        erro("na funcao socket");
+    if ( bind(noti_fd,(struct sockaddr*)&addr,sizeof(addr)) < 0)
+        erro("na funcao bind");
+    if( listen(noti_fd, 5) < 0)
+        erro("na funcao listen");
+    client_addr_size2 = sizeof(client_addr2);
+//    falta declarar noti
+    noti = accept(noti_fd,(struct sockaddr *)&client_addr2,(socklen_t *)&client_addr_size2);
+
+    if(noti>0){
+        if(fork()==0){
+            close(noti_fd);
+            notificacoes(noti,id_client);
+            exit(0);
+        }
+    close(noti);
+    }
+    */
     int cliente=-1;
     long nread = 0;
     char buffer[BUF_SIZE],aux[BUF_SIZE];
@@ -215,6 +270,10 @@ void process_client(int client_fd){
             subscricoes(client_fd,cliente);
         } else if(strcmp(buffer,"4")==0){
             printf("\n");
+        } else if(strcmp(buffer,"5")==0){
+            total_pessoas[0].call_feitas = 20;
+            sprintf(aux,"\n\n>>recebi a opçao %s e as chamdas feitas mudaram para %d   <<<\n",buffer,total_pessoas[0].call_feitas);
+            write(client_fd, aux, BUF_SIZE);
         } else{
             write(client_fd,"\n\n>>ERRO: Escolha 1,2,3 ou 4!",BUF_SIZE);
         }
@@ -228,34 +287,12 @@ void process_client(int client_fd){
 
 //Media do grupo
 void media_grupo(int client_fd){
-	double total_calls_duracao = 0;
-  	double total_calls_feitas = 0;
- 	double total_calls_perdidas = 0;
- 	double total_calls_recebidas = 0;
- 	double total_sms_recebidas = 0;
- 	double total_sms_enviadas = 0;
-	
-	//somar
-	for(int i=0;i<N_USERS;i++){
-        total_calls_duracao+=total_pessoas[i].call_duracao;
-        total_calls_feitas+=total_pessoas[i].call_feitas;
-        total_calls_perdidas+=total_pessoas[i].call_perdidas;
-        total_calls_recebidas+=total_pessoas[i].call_recebidas;
-		total_sms_recebidas+=total_pessoas[i].sms_recebidas;
-		total_sms_enviadas+=total_pessoas[i].sms_enviadas;
-	}
-	//Media
-	double media_calls_duracao=total_calls_duracao/N_USERS;
-	double media_calls_feitas=total_calls_feitas/N_USERS;
-	double media_calls_perdidas=total_calls_perdidas/N_USERS;
-	double media_calls_recebidas=total_calls_recebidas/N_USERS;
-	double media_sms_recebidas=total_sms_recebidas/N_USERS;
-	double media_sms_enviadas=total_sms_enviadas/N_USERS;
 	
 	//Passar para String
 	char buff[BUF_SIZE];
+    calcula_media();
 
-  	sprintf(buff, "\n++++++++++++++++++++++++++++++++++++\n+  Media chamadas recebidas: %.2f  +\n+  Media chamadas feitas: %.2f     +\n+  Media chamadas perdidas: %.2f   +\n+  Duração media de chamada: %.2f  +\n+  SMS enviadas: %.2f              +\n+  SMS recebidas: %.2f             +\n++++++++++++++++++++++++++++++++++++", media_calls_recebidas, media_calls_feitas, media_calls_perdidas, media_calls_duracao, media_sms_enviadas, media_sms_recebidas);
+  	sprintf(buff, "\n++++++++++++++++++++++++++++++++++++\n+  Media chamadas recebidas: %.2f  +\n+  Media chamadas feitas: %.2f     +\n+  Media chamadas perdidas: %.2f   +\n+  Duração media de chamada: %.2f  +\n+  SMS enviadas: %.2f              +\n+  SMS recebidas: %.2f             +\n++++++++++++++++++++++++++++++++++++",media[0],media[1],media[2],media[3],media[4],media[5]);
 	//Envia para cliente
   	write(client_fd,buff, BUF_SIZE);
 

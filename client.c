@@ -13,7 +13,7 @@
 #include <netdb.h>
 
 #define BUF_SIZE  1024
-#define SERVER_PORT 9000
+#define SERVER_PORT 9001
 #define IP_ADRR "127.0.0.1"
 
 void erro(char *msg);
@@ -112,6 +112,11 @@ int main(int argc, char *argv[]) {
             }
         } else if(strcmp(acao,"4")==0){
             printf("\n");
+        } else if(strcmp(acao,"5")==0){
+            nread = read(fd, buffer, BUF_SIZE);
+            buffer[nread] = '\0';
+            system("clear");
+            printf("%s\n", buffer);
         } else{
             nread = read(fd, buffer, BUF_SIZE);
             buffer[nread] = '\0';
@@ -119,6 +124,7 @@ int main(int argc, char *argv[]) {
             printf("%s\n", buffer);
         }
     }
+    system("clear");
     printf("\nFechando conexão com o servidor...\n");
     close(fd);
     exit(0);
