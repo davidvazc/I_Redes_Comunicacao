@@ -369,8 +369,49 @@ void subscricoes(int client_fd,int i){
 
 
 
-void notificacoes(int client_fd,char id_client[]){
-	
+void notificacoes(int noti_fd,char id_client[]){
+	int i=0;
+	while(strcmp(total_pessoas[i].id,id_client)!=0 && i<N_USERS){
+		i++;
+	}
+	while(1){
+		if(ogrupo.calls_recebidas!=grupo.calls_recebidas){
+			ogrupo.calls_recebidas=grupo.calls_recebidas;
+			if(total_pessoas[i].sub_calls_recebidas==true){
+				write(noti_fd,"O valor das chamadas recebidas foi alterado!",BUF_SIZE);
+			}
+		}
+		else if(ogrupo.calls_feitas!=grupo.calls_feitas){
+			ogrupo.calls_feitas=grupo.calls_feitas;
+			if(total_pessoas[i].sub_calls_feitas==true){
+				write(noti_fd,"O valor das chamadas feitas foi alterado!",BUF_SIZE);
+			}
+		}
+		else if(ogrupo.calls_duracao!=grupo.calls_duracao){
+			ogrupo.calls_duracao=grupo.calls_duracao;
+			if(total_pessoas[i].sub_calls_duracao==true){
+				write(noti_fd,"O valor da duração das chamadas foi alterado!",BUF_SIZE);
+			}
+		}
+		else if(ogrupo.calls_perdidas!=grupo.calls_perdidas){
+			ogrupo.calls_perdidas=grupo.calls_perdidas;
+			if(total_pessoas[i].sub_calls_perdidas==true){
+				write(noti_fd,"O valor das chamadas perdidas foi alterado!",BUF_SIZE);
+			}
+		}
+		else if(ogrupo.sms_recebidas!=grupo.sms_recebidas){
+			ogrupo.sms_recebidas=grupo.sms_recebidas;
+			if(total_pessoas[i].sub_sms_recebidas==true){
+				write(noti_fd,"O valor das SMS recebidas foi alterado!",BUF_SIZE);
+			}
+		}
+		else if(ogrupo.sms_enviadas!=grupo.sms_enviadas){
+			ogrupo.sms_enviadas=grupo.sms_enviadas;
+			if(total_pessoas[i].sub_sms_enviadas==true){
+				write(noti_fd,"O valor das SMS enviadas foi alterado!",BUF_SIZE);
+			}
+		}
+	}
 	
 	
 }
