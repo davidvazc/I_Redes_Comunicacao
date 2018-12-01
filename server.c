@@ -24,6 +24,7 @@
 void process_client(int client_fd);
 void erro(char *msg);
 void media_grupo(int client_fd);
+void subscricoes(int client_fd,int i);
 
 
 typedef struct{
@@ -176,43 +177,42 @@ void process_client(int client_fd){
                 buffer[nread] = '\0';
                 printf("%s\n", buffer);
                 if(strcmp(buffer, "1")==0){
-                    sprintf(aux,"Actividade: %s",total_pessoas[cliente].atividade);
+                    sprintf(aux,"\n\n\n>>>   Actividade: %s   <<<\n",total_pessoas[cliente].atividade);
                     write(client_fd, aux, BUF_SIZE);
                 } else if(strcmp(buffer, "2")==0){
-                    sprintf(aux,"Localização: %s",total_pessoas[cliente].localizacao);
+                    sprintf(aux,"\n\n\n>>>   Localização: %s   <<<\n",total_pessoas[cliente].localizacao);
                     write(client_fd, aux, BUF_SIZE);
                 } else if(strcmp(buffer, "3")==0){
-                    sprintf(aux,"Departamento: %s",total_pessoas[cliente].departamento);
+                    sprintf(aux,"\n\n\n>>>   Departamento: %s   <<<\n",total_pessoas[cliente].departamento);
                     write(client_fd, aux, BUF_SIZE);
                 } else if(strcmp(buffer, "4")==0){
-                    sprintf(aux,"Chamadas feitas: %d",total_pessoas[cliente].call_feitas);
+                    sprintf(aux,"\n\n\n>>>   Chamadas feitas: %d   <<<\n",total_pessoas[cliente].call_feitas);
                     write(client_fd, aux, BUF_SIZE);
                 } else if(strcmp(buffer, "5")==0){
-                    sprintf(aux,"Duração chamadas: %d",total_pessoas[cliente].call_duracao);
+                    sprintf(aux,"\n\n\n>>>   Duração chamadas: %d   <<<\n",total_pessoas[cliente].call_duracao);
                     write(client_fd, aux, BUF_SIZE);
                 } else if(strcmp(buffer, "6")==0){
-                    sprintf(aux,"Chamadas perdidas: %d",total_pessoas[cliente].call_perdidas);
+                    sprintf(aux,"\n\n\n>>>   Chamadas perdidas: %d   <<<\n",total_pessoas[cliente].call_perdidas);
                     write(client_fd, aux, BUF_SIZE);
                 } else if(strcmp(buffer, "7")==0){
-                    sprintf(aux,"Chamadas recebidas: %d",total_pessoas[cliente].call_recebidas);
+                    sprintf(aux,"\n\n\n>>>   Chamadas recebidas: %d   <<<\n",total_pessoas[cliente].call_recebidas);
                     write(client_fd, aux, BUF_SIZE);
                 } else if(strcmp(buffer, "8")==0){
-                    sprintf(aux,"SMS recebidas: %d",total_pessoas[cliente].sms_recebidas);
+                    sprintf(aux,"\n\n\n>>>   SMS recebidas: %d   <<<\n",total_pessoas[cliente].sms_recebidas);
                     write(client_fd, aux, BUF_SIZE);
                 } else if(strcmp(buffer, "9")==0){
-                    sprintf(aux,"SMS enviadas: %d",total_pessoas[cliente].sms_enviadas);
+                    sprintf(aux,"\n\n\n>>>   SMS enviadas: %d   <<<\n",total_pessoas[cliente].sms_enviadas);
                     write(client_fd, aux, BUF_SIZE);
                 } else if(strcmp(buffer, "10")==0){
                     write(client_fd,"\n", BUF_SIZE);
                 } else{
-                    write(client_fd,"\nERRO: Escolha 1,2,3,4,5,6,7,8,9 ou 10!\n",BUF_SIZE);
+                    write(client_fd,"\n\n\n>>>ERRO: Escolha 1,2,3,4,5,6,7,8,9 ou 10!\n",BUF_SIZE);
                 }
             }
         } else if(strcmp(buffer,"2")==0){
             media_grupo(client_fd);
         } else if(strcmp(buffer,"3")==0){
-            write(client_fd,"Opçao 3 não implementada!",BUF_SIZE);
-//            subscrito(client_fd, id);
+            subscricoes(client_fd,cliente);
         } else if(strcmp(buffer,"4")==0){
             printf("\n");
         } else{
@@ -262,87 +262,75 @@ void media_grupo(int client_fd){
 }
 
 
-void subscricoes(int client_fd,char id_client[]){
-    int i = 0;
-	long nread=0;
-	char buffer[BUF_SIZE];
-    while(strcmp(total_pessoas[i].id,id_client)!=0 && i<BUF_SIZE){
-		i++;
-	}
-	write(client_fd,"Escolha um dado que queira subscrever/cancelar:\n1.Chamadas recebidas.\n2.Chamadas feitas.\n3.Chamadas perdidas\n4.Duração media de chamada.\n5.SMS enviados.\n6.SMS recebidos.\n",BUF_SIZE);
-	nread=read(client_fd,buffer,BUF_SIZE);
-	buffer[nread]='\0';
-	do{
-	if(strcmp(buffer,"1")==0){
-        if(total_pessoas[i].sub_call_recebidas==false){
-            total_pessoas[i].sub_call_recebidas=true;
-			write(client_fd,"Está agora subscrito.",BUF_SIZE);
-		}
-		else{
-            total_pessoas[i].sub_call_recebidas=false;
-			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
+void subscricoes(int client_fd,int i){
+    char buffer[BUF_SIZE];
+    long nread=0;
+    do{
+        write(client_fd,"++++++++++++++++++++++++++++++++++++++++++++++++\n+  Selecione a que deseja subscrever/cancelar: +\n+  1- Chamadas recebidas                       +\n+  2- Chamdas feitas                           +\n+  3- Chamadas perdidas                        +\n+  4- Duração media de chamada                 +\n+  5- SMS enviados                             +\n+  6- SMS recebidos                            +\n+  7- Voltar                                   +\n++++++++++++++++++++++++++++++++++++++++++++++++\n",BUF_SIZE);
+    
+        nread=read(client_fd,buffer,BUF_SIZE);
+        buffer[nread]='\0';
+        printf("%s\n", buffer);
+	
+        if(strcmp(buffer,"1")==0){
+            if(total_pessoas[i].sub_call_recebidas==false){
+                total_pessoas[i].sub_call_recebidas=true;
+                write(client_fd,"\n\n\n>>>   Está agora subscrito.   <<<\n",BUF_SIZE);
+            } else{
+                total_pessoas[i].sub_call_recebidas=false;
+                write(client_fd,"\n\n\n>>>   Deixou de estar subscrito.   <<<\n",BUF_SIZE);
 		
-		}
-	}
-	else if(strcmp(buffer,"2")==0){
-        if(total_pessoas[i].sub_call_feitas==false){
-            total_pessoas[i].sub_call_feitas=true;
-			write(client_fd,"Está agora subscrito.",BUF_SIZE);
-		}
-		else{
-            total_pessoas[i].sub_call_feitas=false;
-			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
-		}
-	}
-	else if(strcmp(buffer,"3")==0){
-        if(total_pessoas[i].sub_call_perdidas==false){
-            total_pessoas[i].sub_call_perdidas=true;
-			write(client_fd,"Está agora subscrito.",BUF_SIZE);
-		}
-		else{
-            total_pessoas[i].sub_call_perdidas=false;
-			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
-		}
+            }
+        } else if(strcmp(buffer,"2")==0){
+            if(total_pessoas[i].sub_call_feitas==false){
+                total_pessoas[i].sub_call_feitas=true;
+                write(client_fd,"\n\n\n>>>   Está agora subscrito.   <<<\n",BUF_SIZE);
+            } else{
+                total_pessoas[i].sub_call_feitas=false;
+                write(client_fd,"\n\n\n>>>   Deixou de estar subscrito.   <<<\n",BUF_SIZE);
+            }
+        } else if(strcmp(buffer,"3")==0){
+            if(total_pessoas[i].sub_call_perdidas==false){
+                total_pessoas[i].sub_call_perdidas=true;
+                write(client_fd,"\n\n\n>>>   Está agora subscrito.   <<<\n",BUF_SIZE);
+            } else{
+                total_pessoas[i].sub_call_perdidas=false;
+                write(client_fd,"\n\n\n>>>   Deixou de estar subscrito.   <<<\n",BUF_SIZE);
+            }
+		} else if(strcmp(buffer,"4")==0){
+            if(total_pessoas[i].sub_call_duracao==false){
+                total_pessoas[i].sub_call_duracao=true;
+                write(client_fd,"\n\n\n>>>   Está agora subscrito.   <<<\n",BUF_SIZE);
+            } else{
+                total_pessoas[i].sub_call_duracao=false;
+                write(client_fd,"\n\n\n>>>   Deixou de estar subscrito.   <<<\n",BUF_SIZE);
+            }
+        } else if(strcmp(buffer,"5")==0){
+            if(total_pessoas[i].sub_sms_enviadas==false){
+                total_pessoas[i].sub_sms_enviadas=true;
+                write(client_fd,"\n\n\n>>>   Está agora subscrito.   <<<\n",BUF_SIZE);
+            } else{
+                total_pessoas[i].sub_sms_enviadas=false;
+                write(client_fd,"\n\n\n>>>   Deixou de estar subscrito.   <<<\n",BUF_SIZE);
+            }
+		} else if(strcmp(buffer,"6")==0){
+            if(total_pessoas[i].sub_sms_recebidas==false){
+                total_pessoas[i].sub_sms_recebidas=true;
+                write(client_fd,"\n\n\n>>>   Está agora subscrito.   <<<\n",BUF_SIZE);
+            } else{
+                total_pessoas[i].sub_sms_recebidas=false;
+                write(client_fd,"\n\n\n>>>   Deixou de estar subscrito.   <<<\n",BUF_SIZE);
+            }
 		
-	}
-	else if(strcmp(buffer,"4")==0){
-        if(total_pessoas[i].sub_call_duracao==false){
-            total_pessoas[i].sub_call_duracao=true;
-			write(client_fd,"Está agora subscrito.",BUF_SIZE);
-		}
-		else{
-            total_pessoas[i].sub_call_duracao=false;
-			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
-		}
-		
-	}
-	else if(strcmp(buffer,"5")==0){
-		if(total_pessoas[i].sub_sms_enviadas==false){
-			total_pessoas[i].sub_sms_enviadas=true;
-			write(client_fd,"Está agora subscrito.",BUF_SIZE);
-		}
-		else{
-			total_pessoas[i].sub_sms_enviadas=false;
-			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
-		}
-		
-	}
-	else if(strcmp(buffer,"6")==0){
-		if(total_pessoas[i].sub_sms_recebidas==false){
-			total_pessoas[i].sub_sms_recebidas=true;
-			write(client_fd,"Está agora subscrito.",BUF_SIZE);
-		}
-		else{
-			total_pessoas[i].sub_sms_recebidas=false;
-			write(client_fd,"Deixou de estar subscrito.",BUF_SIZE);
-		}
-		
-	}
-	else{
-		write(client_fd,"Essa opção não existe.",BUF_SIZE);
-	}
-	}while(strcmp(buffer,"6")!=0 && strcmp(buffer,"5")!=0 && strcmp(buffer,"4")!=0 && strcmp(buffer,"3")!=0 && strcmp(buffer,"2")!=0 && strcmp(buffer,"1")!=0);
+        } else if(strcmp(buffer,"7")==0){
+            write(client_fd,"\n", BUF_SIZE);
+        } else{
+            write(client_fd,"\n\n\n>>>ERRO: Escolha 1,2,3,4,5,6 ou 7!\n",BUF_SIZE);
+        }
+	}while(strcmp(buffer,"7")!=0);
 }
+
+
 
 void notificacoes(int client_fd,char id_client[]){
 	

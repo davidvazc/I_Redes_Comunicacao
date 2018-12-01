@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
     
     nread = read(fd, buffer, BUF_SIZE); //Le mensagem de boas vindas
     buffer[nread] = '\0';
+    system("clear");
     printf("%s\n", buffer);
     
     scanf("%s", acao);
@@ -56,28 +57,30 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
     else{
-        
+        system("clear");
         printf("%s\n", buffer);
         while(strcmp(buffer,"Cliente existe")!=0){
             scanf("%s", acao);
             write(fd, acao, BUF_SIZE);
             nread = read(fd, buffer, BUF_SIZE);
             buffer[nread] = '\0';
-            if(strcmp(buffer,"Cliente existe")!=0)
+            if(strcmp(buffer,"Cliente existe")!=0){
+                system("clear");
                 printf("%s\n", buffer);
+            }
             else
               printf("\n");
         }
     }
-    
+    system("clear");
     while(!(strcmp(acao, "4")==0)){
         nread = read(fd, buffer, BUF_SIZE);
         buffer[nread] = '\0';
         printf("%s\n", buffer);
-
         scanf("%s", acao);
         write(fd, acao, BUF_SIZE);
         if(strcmp(acao,"1")==0){
+            system("clear");
             while(!(strcmp(acao,"10")==0)){
                 nread = read(fd, buffer, BUF_SIZE);
                 buffer[nread] = '\0';
@@ -86,22 +89,33 @@ int main(int argc, char *argv[]) {
                 write(fd, acao, BUF_SIZE);
                 nread = read(fd, buffer, BUF_SIZE);
                 buffer[nread] = '\0';
+                system("clear");
                 printf("%s\n", buffer);
             }
         } else if(strcmp(acao,"2")==0){
             nread = read(fd, buffer, BUF_SIZE);
             buffer[nread] = '\0';
+            system("clear");
             printf("%s\n", buffer);
         } else if(strcmp(acao,"3")==0){
-            nread = read(fd, buffer, BUF_SIZE);
-            buffer[nread] = '\0';
-            printf("%s\n", buffer);
-            //            subscrito(client_fd, id);
+            system("clear");
+            while(!(strcmp(acao,"7")==0)){
+                nread = read(fd, buffer, BUF_SIZE);
+                buffer[nread] = '\0';
+                printf("%s\n", buffer);
+                scanf("%s", acao);
+                write(fd, acao, BUF_SIZE);
+                nread = read(fd, buffer, BUF_SIZE);
+                buffer[nread] = '\0';
+                system("clear");
+                printf("%s\n", buffer);
+            }
         } else if(strcmp(acao,"4")==0){
             printf("\n");
         } else{
             nread = read(fd, buffer, BUF_SIZE);
             buffer[nread] = '\0';
+            system("clear");
             printf("%s\n", buffer);
         }
     }
