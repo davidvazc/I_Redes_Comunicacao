@@ -13,10 +13,13 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include <pthread.h>
+#include <signal.h>
 
 
-#define BUF_SIZE    1024
+#define BUF_SIZE   1024
 #define SERVER_PORT     9001
+#define SERVER_PORT2 9000
 #define N_USERS   2
 #define NMEDIA  6
 
@@ -26,6 +29,17 @@ void process_client(int client_fd);
 void erro(char *msg);
 void media_grupo(int client_fd);
 void subscricoes(int client_fd,int i);
+void* notificacoes(void* idp);
+
+typedef struct{
+	double calls_duracao;
+	double calls_feitas;
+	double calls_perdidas;
+	double calls_recebidas;
+	double sms_recebidas;
+	double sms_enviadas;
+}Grupo;
+
 
 
 typedef struct{
@@ -50,6 +64,11 @@ typedef struct{
 Client total_pessoas[BUF_SIZE];
 int nr_clientes;
 double media[NMEDIA];
+int done=0;
+int n_media=0;
+
+Grupo grupo;
+Grupo ogrupo;
 
 void faz_client(){
     strcpy(total_pessoas[0].atividade, "Estudando");
@@ -90,8 +109,9 @@ void faz_client(){
 }
 
 void calcula_media(){
+	int i;
     //somar
-    for(int i=0;i<N_USERS;i++){
+    for(i=0;i<N_USERS;i++){
         media[0]+=total_pessoas[i].call_feitas;
         media[1]+=total_pessoas[i].call_duracao;
         media[2]+=total_pessoas[i].call_perdidas;
@@ -158,44 +178,17 @@ int main() {
 }
 
 void process_client(int client_fd){
-    /*
-//      CRIADO POR TIq
-    struct sockaddr_in addr, client_addr2;
-    long nreadSUB = 0;
-    char id_client[BUF_SIZE];
-    int client_addr_size2;
-    int noti_fd;
-    calcula_media();
-    
-    if ( (noti_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        erro("na funcao socket");
-    if ( bind(noti_fd,(struct sockaddr*)&addr,sizeof(addr)) < 0)
-        erro("na funcao bind");
-    if( listen(noti_fd, 5) < 0)
-        erro("na funcao listen");
-    client_addr_size2 = sizeof(client_addr2);
-//    falta declarar noti
-    noti = accept(noti_fd,(struct sockaddr *)&client_addr2,(socklen_t *)&client_addr_size2);
-
-    if(noti>0){
-        if(fork()==0){
-            close(noti_fd);
-            notificacoes(noti,id_client);
-            exit(0);
-        }
-    close(noti);
-    }
-    */
     int cliente=-1;
     long nread = 0;
-    char buffer[BUF_SIZE],aux[BUF_SIZE];
+    int i;
+    char buffer[BUF_SIZE],aux[BUF_SIZE*2];
     write(client_fd,"\n++++++++++++++++++++++++++++++++++++++++++\n+                                        +\n+   SEJA BEM VINDO AO SERVIDOR ISABELA   +\n+                                        +\n++++++++++++++++++++++++++++++++++++++++++\n\nIntoruza o seu id:",BUF_SIZE); //escreve mensagem de boas vindas e pede id
     
     nread = read(client_fd, buffer, BUF_SIZE);//le id
     buffer[nread] = '\0';
     printf("%s\n", buffer);
     
-    for(int i=0;i<nr_clientes;i++){
+    for(i=0;i<nr_clientes;i++){
         if(strcmp(buffer,total_pessoas[i].id)==0){ //verifica se nome está presente
             cliente=i;
         }
@@ -209,7 +202,7 @@ void process_client(int client_fd){
             nread = read(client_fd, buffer, BUF_SIZE);
             buffer[nread] = '\0';
             printf("%s\n", buffer);
-            for(int i=0;i<nr_clientes;i++){
+            for(i=0;i<nr_clientes;i++){
                 if(strcmp(buffer,total_pessoas[i].id)==0){
                     cliente=i;
                     write(client_fd,"Cliente existe",BUF_SIZE);
@@ -219,7 +212,9 @@ void process_client(int client_fd){
                 write(client_fd,"\nO id introduzido não existe!\nIntroduza novamente:",BUF_SIZE);
         }
     }
-    
+    pthread_t my_thread;
+    int id=i;
+    pthread_create(&my_thread,NULL,notificacoes,&id);
     while(!(strcmp(buffer,"4")==0)){
         write(client_fd,"\n+++++++++++++++++++++++++++++++++\n+        Escolha a opção        +\n+    1-Informações pessoais     +\n+    2-Media de grupo           +\n+    3-Subscrição               +\n+    4-Sair                     +\n+++++++++++++++++++++++++++++++++\n",BUF_SIZE);
         nread = read(client_fd, buffer, BUF_SIZE);
@@ -266,6 +261,7 @@ void process_client(int client_fd){
             }
         } else if(strcmp(buffer,"2")==0){
             media_grupo(client_fd);
+	    n_media++;
         } else if(strcmp(buffer,"3")==0){
             subscricoes(client_fd,cliente);
         } else if(strcmp(buffer,"4")==0){
@@ -280,8 +276,10 @@ void process_client(int client_fd){
     }
     
     printf("Fechando conexão com o cliente...\n");
-    close(client_fd);
+    done=1;
+    pthread_join(my_thread,NULL);
     exit(0);
+
     
 }
 
@@ -290,7 +288,9 @@ void media_grupo(int client_fd){
 	
 	//Passar para String
 	char buff[BUF_SIZE];
+    if(n_media==0){
     calcula_media();
+	}
 
   	sprintf(buff, "\n++++++++++++++++++++++++++++++++++++\n+  Media chamadas recebidas: %.2f  +\n+  Media chamadas feitas: %.2f     +\n+  Media chamadas perdidas: %.2f   +\n+  Duração media de chamada: %.2f  +\n+  SMS enviadas: %.2f              +\n+  SMS recebidas: %.2f             +\n++++++++++++++++++++++++++++++++++++",media[0],media[1],media[2],media[3],media[4],media[5]);
 	//Envia para cliente
@@ -369,49 +369,75 @@ void subscricoes(int client_fd,int i){
 
 
 
-void notificacoes(int noti_fd,char id_client[]){
-	int i=0;
-	while(strcmp(total_pessoas[i].id,id_client)!=0 && i<N_USERS){
-		i++;
+void* notificacoes(void* idp){
+	int fd2;
+	int noti_fd=0;
+    struct sockaddr_in addr2, client_addr2;
+    int client_addr_size;
+	int i=*((int*) idp);
+    
+//    cria estrutura
+    bzero((void *) &addr2, sizeof(addr2));
+    
+    // Configure settings of the server address struct
+    // Address family = Internet
+    addr2.sin_family = AF_INET;
+    //Set IP address to localhost
+    addr2.sin_addr.s_addr = htonl(INADDR_ANY);
+    //Set port number, using htons function to use proper byte order
+    addr2.sin_port = htons(SERVER_PORT2);
+    
+    //Create the socket.
+    if ( (fd2 = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        erro("na funcao socket");
+    //Bind the address struct to the socket
+    if ( bind(fd2,(struct sockaddr*)&addr2,sizeof(addr2)) < 0)
+        erro("na funcao bind");
+    //Listen on the socket, with 5 max connection requests queued
+    if( listen(fd2, 5) < 0)
+        erro("na funcao listen");
+	while(noti_fd<=0){
+	client_addr_size = sizeof(client_addr2);
+	noti_fd=accept(fd2,(struct sockaddr *)&client_addr2,(socklen_t *)&client_addr_size);
 	}
-	while(1){
+		close(fd2);
+		write(noti_fd,"Connected\n",BUF_SIZE);
+		while(done==0){
 		if(ogrupo.calls_recebidas!=grupo.calls_recebidas){
 			ogrupo.calls_recebidas=grupo.calls_recebidas;
-			if(total_pessoas[i].sub_calls_recebidas==true){
+			if(total_pessoas[i].sub_call_recebidas==true){
 				write(noti_fd,"O valor das chamadas recebidas foi alterado!",BUF_SIZE);
 			}
-		}
-		else if(ogrupo.calls_feitas!=grupo.calls_feitas){
+		}else if(ogrupo.calls_feitas!=grupo.calls_feitas){
 			ogrupo.calls_feitas=grupo.calls_feitas;
-			if(total_pessoas[i].sub_calls_feitas==true){
+			if(total_pessoas[i].sub_call_feitas==true){
 				write(noti_fd,"O valor das chamadas feitas foi alterado!",BUF_SIZE);
 			}
-		}
-		else if(ogrupo.calls_duracao!=grupo.calls_duracao){
+		}else if(ogrupo.calls_duracao!=grupo.calls_duracao){
 			ogrupo.calls_duracao=grupo.calls_duracao;
-			if(total_pessoas[i].sub_calls_duracao==true){
+			if(total_pessoas[i].sub_call_duracao==true){
 				write(noti_fd,"O valor da duração das chamadas foi alterado!",BUF_SIZE);
 			}
-		}
-		else if(ogrupo.calls_perdidas!=grupo.calls_perdidas){
+		}else if(ogrupo.calls_perdidas!=grupo.calls_perdidas){
 			ogrupo.calls_perdidas=grupo.calls_perdidas;
-			if(total_pessoas[i].sub_calls_perdidas==true){
+			if(total_pessoas[i].sub_call_perdidas==true){
 				write(noti_fd,"O valor das chamadas perdidas foi alterado!",BUF_SIZE);
 			}
-		}
-		else if(ogrupo.sms_recebidas!=grupo.sms_recebidas){
+		}else if(ogrupo.sms_recebidas!=grupo.sms_recebidas){
 			ogrupo.sms_recebidas=grupo.sms_recebidas;
 			if(total_pessoas[i].sub_sms_recebidas==true){
 				write(noti_fd,"O valor das SMS recebidas foi alterado!",BUF_SIZE);
 			}
-		}
-		else if(ogrupo.sms_enviadas!=grupo.sms_enviadas){
+		}else if(ogrupo.sms_enviadas!=grupo.sms_enviadas){
 			ogrupo.sms_enviadas=grupo.sms_enviadas;
 			if(total_pessoas[i].sub_sms_enviadas==true){
 				write(noti_fd,"O valor das SMS enviadas foi alterado!",BUF_SIZE);
 			}
 		}
 	}
+      close(noti_fd);
+      pthread_exit(NULL);
+      return NULL;
 	
 	
 }

@@ -11,12 +11,17 @@
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <pthread.h>
+#include <signal.h>
 
 #define BUF_SIZE  1024
 #define SERVER_PORT 9001
+#define SERVER_PORT2 9000
 #define IP_ADRR "127.0.0.1"
 
 void erro(char *msg);
+void* notifica(void* idp);
+int done=0;
 
 int main(int argc, char *argv[]) {
     char endServer[100];
@@ -41,6 +46,11 @@ int main(int argc, char *argv[]) {
     
     long nread = 0;
     char buffer[BUF_SIZE],acao[BUF_SIZE];
+    pthread_t my_thread;
+    struct sockaddr_in addr2;
+    int fd2;
+    strcpy(endServer, IP_ADRR);
+    
     
     nread = read(fd, buffer, BUF_SIZE); //Le mensagem de boas vindas
     buffer[nread] = '\0';
@@ -73,6 +83,20 @@ int main(int argc, char *argv[]) {
         }
     }
     system("clear");
+    if ((hostPtr = gethostbyname(endServer)) == 0)
+        erro("Nao consegui obter endereço");
+    
+    bzero((void *) &addr2, sizeof(addr2));
+    addr2.sin_family = AF_INET;
+    addr2.sin_addr.s_addr = ((struct in_addr *)(hostPtr->h_addr))->s_addr;
+    addr2.sin_port = htons(SERVER_PORT2);
+    
+    if((fd2 = socket(AF_INET,SOCK_STREAM,0)) == -1)
+        erro("socket");
+    
+    if( connect(fd2,(struct sockaddr *)&addr2,sizeof (addr2)) < 0)
+        erro("Connect");
+    pthread_create(&my_thread,NULL,notifica,&fd2);
     while(!(strcmp(acao, "4")==0)){
         nread = read(fd, buffer, BUF_SIZE);
         buffer[nread] = '\0';
@@ -126,9 +150,34 @@ int main(int argc, char *argv[]) {
     }
     system("clear");
     printf("\nFechando conexão com o servidor...\n");
+    done=1;
+    pthread_join(my_thread,NULL);
     close(fd);
     exit(0);
 }
+
+void* notifica(void* idp){
+    int fd2=*((int*) idp);
+    long nread = 0;
+    char buffer[BUF_SIZE];
+	nread = read(fd2, buffer, BUF_SIZE);
+        buffer[nread] = '\0';
+        printf("%s\n", buffer);
+	while(done==0){
+		nread = read(fd2, buffer, BUF_SIZE);
+                buffer[nread] = '\0';
+                printf("%s\n", buffer);
+
+	}
+
+	close(fd2);
+      pthread_exit(NULL);
+      return NULL;
+
+
+}
+
+
 
 void erro(char *msg){
     printf("Erro: %s\n", msg);
