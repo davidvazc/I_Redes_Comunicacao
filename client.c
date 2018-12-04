@@ -15,19 +15,56 @@
 #include <signal.h>
 
 #define BUF_SIZE  1024
-#define SERVER_PORT 9001
+#define SERVER_PORT 9002
 #define SERVER_PORT2 9000
 #define IP_ADRR "127.0.0.1"
 
 void erro(char *msg);
-void* notifica(void* idp);
 int done=0;
+char endServer[100];
+struct hostent *hostPtr;
+
+void* notifica(){
+    sleep(5);
+    long nread = 0;
+    char buffer[BUF_SIZE];
+    struct sockaddr_in addr2;
+    int fd2;
+    strcpy(endServer, IP_ADRR);
+    if ((hostPtr = gethostbyname(endServer)) == 0)
+        erro("Nao consegui obter endereço");
+    
+    bzero((void *) &addr2, sizeof(addr2));
+    addr2.sin_family = AF_INET;
+    addr2.sin_addr.s_addr = ((struct in_addr *)(hostPtr->h_addr))->s_addr;
+    addr2.sin_port = htons(SERVER_PORT2);
+    
+    if((fd2 = socket(AF_INET,SOCK_STREAM,0)) == -1)
+        erro("socket");
+    
+    if( connect(fd2,(struct sockaddr *)&addr2,sizeof (addr2)) < 0)
+        erro("Connect");
+    nread = read(fd2, buffer, BUF_SIZE);
+    buffer[nread] = '\0';
+    printf("%s\n", buffer);
+    while(done==0){
+        nread = read(fd2, buffer, BUF_SIZE);
+        buffer[nread] = '\0';
+        printf("%s\n", buffer);
+        
+    }
+    
+    close(fd2);
+    pthread_exit(NULL);
+    return NULL;
+    
+    
+}
 
 int main(int argc, char *argv[]) {
-    char endServer[100];
+    
     int fd;
     struct sockaddr_in addr;
-    struct hostent *hostPtr;
     strcpy(endServer, IP_ADRR);
     
     if ((hostPtr = gethostbyname(endServer)) == 0)
@@ -47,9 +84,7 @@ int main(int argc, char *argv[]) {
     long nread = 0;
     char buffer[BUF_SIZE],acao[BUF_SIZE];
     pthread_t my_thread;
-    struct sockaddr_in addr2;
-    int fd2;
-    strcpy(endServer, IP_ADRR);
+    
     
     
     nread = read(fd, buffer, BUF_SIZE); //Le mensagem de boas vindas
@@ -83,20 +118,7 @@ int main(int argc, char *argv[]) {
         }
     }
     system("clear");
-    if ((hostPtr = gethostbyname(endServer)) == 0)
-        erro("Nao consegui obter endereço");
-    
-    bzero((void *) &addr2, sizeof(addr2));
-    addr2.sin_family = AF_INET;
-    addr2.sin_addr.s_addr = ((struct in_addr *)(hostPtr->h_addr))->s_addr;
-    addr2.sin_port = htons(SERVER_PORT2);
-    
-    if((fd2 = socket(AF_INET,SOCK_STREAM,0)) == -1)
-        erro("socket");
-    
-    if( connect(fd2,(struct sockaddr *)&addr2,sizeof (addr2)) < 0)
-        erro("Connect");
-    pthread_create(&my_thread,NULL,notifica,&fd2);
+    pthread_create(&my_thread,NULL,notifica,NULL);
     while(!(strcmp(acao, "4")==0)){
         nread = read(fd, buffer, BUF_SIZE);
         buffer[nread] = '\0';
@@ -105,7 +127,7 @@ int main(int argc, char *argv[]) {
         write(fd, acao, BUF_SIZE);
         if(strcmp(acao,"1")==0){
             system("clear");
-            while(!(strcmp(acao,"10")==0)){
+            while(!(strcmp(acao,"11")==0)){
                 nread = read(fd, buffer, BUF_SIZE);
                 buffer[nread] = '\0';
                 printf("%s\n", buffer);
@@ -117,13 +139,21 @@ int main(int argc, char *argv[]) {
                 printf("%s\n", buffer);
             }
         } else if(strcmp(acao,"2")==0){
-            nread = read(fd, buffer, BUF_SIZE);
-            buffer[nread] = '\0';
             system("clear");
-            printf("%s\n", buffer);
+            while(!(strcmp(acao,"8")==0)){
+                nread = read(fd, buffer, BUF_SIZE);
+                buffer[nread] = '\0';
+                printf("%s\n", buffer);
+                scanf("%s", acao);
+                write(fd, acao, BUF_SIZE);
+                nread = read(fd, buffer, BUF_SIZE);
+                buffer[nread] = '\0';
+                system("clear");
+                printf("%s\n", buffer);
+            }
         } else if(strcmp(acao,"3")==0){
             system("clear");
-            while(!(strcmp(acao,"7")==0)){
+            while(!(strcmp(acao,"8")==0)){
                 nread = read(fd, buffer, BUF_SIZE);
                 buffer[nread] = '\0';
                 printf("%s\n", buffer);
@@ -156,26 +186,7 @@ int main(int argc, char *argv[]) {
     exit(0);
 }
 
-void* notifica(void* idp){
-    int fd2=*((int*) idp);
-    long nread = 0;
-    char buffer[BUF_SIZE];
-	nread = read(fd2, buffer, BUF_SIZE);
-        buffer[nread] = '\0';
-        printf("%s\n", buffer);
-	while(done==0){
-		nread = read(fd2, buffer, BUF_SIZE);
-                buffer[nread] = '\0';
-                printf("%s\n", buffer);
 
-	}
-
-	close(fd2);
-      pthread_exit(NULL);
-      return NULL;
-
-
-}
 
 
 
