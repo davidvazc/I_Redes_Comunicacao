@@ -24,7 +24,7 @@ int done=0;
 char endServer[100];
 struct hostent *hostPtr;
 
-void* notifica(){
+void* notifica(){ //Função que recebe as notificações
     sleep(5);
     long nread = 0;
     char buffer[BUF_SIZE];
@@ -42,12 +42,12 @@ void* notifica(){
     if((fd2 = socket(AF_INET,SOCK_STREAM,0)) == -1)
         erro("socket");
     
-    if( connect(fd2,(struct sockaddr *)&addr2,sizeof (addr2)) < 0)
+    if( connect(fd2,(struct sockaddr *)&addr2,sizeof (addr2)) < 0) //Conecta ao thread server
         erro("Connect");
-    nread = read(fd2, buffer, BUF_SIZE);
+    nread = read(fd2, buffer, BUF_SIZE); //Recebe mensagem a dizer que conectou
     buffer[nread] = '\0';
     printf("%s\n", buffer);
-    while(done==0){
+    while(done==0){  //Fica a espera de uma mensagem do thread server(notificação) enquanto o cliente nao pedir para sair do server
         nread = read(fd2, buffer, BUF_SIZE);
         buffer[nread] = '\0';
         printf("%s\n", buffer);
@@ -98,92 +98,87 @@ int main(int argc, char *argv[]) {
     nread = read(fd, buffer, BUF_SIZE);//le resposta sobre id
     buffer[nread] = '\0';
     
-    if(strcmp(buffer,"Cliente existe")==0){
+    if(strcmp(buffer,"Cliente existe")==0){ //leu que o cliente existe na base de dados
         printf("\n");
     }
     else{
         system("clear");
         printf("%s\n", buffer);
-        while(strcmp(buffer,"Cliente existe")!=0){
+        while(strcmp(buffer,"Cliente existe")!=0){ //enquanto o id inserido não existir na base de dados
             scanf("%s", acao);
             write(fd, acao, BUF_SIZE);
             nread = read(fd, buffer, BUF_SIZE);
             buffer[nread] = '\0';
-            if(strcmp(buffer,"Cliente existe")!=0){
+            if(strcmp(buffer,"Cliente existe")!=0){ //id ainda não é o correto
                 system("clear");
                 printf("%s\n", buffer);
             }
-            else
+            else //quando se insere o id correto
               printf("\n");
         }
     }
     system("clear");
-    pthread_create(&my_thread,NULL,notifica,NULL);
-    while(!(strcmp(acao, "4")==0)){
-        nread = read(fd, buffer, BUF_SIZE);
+    pthread_create(&my_thread,NULL,notifica,NULL); //criar o thread que le as notificações
+    while(!(strcmp(acao, "4")==0)){ //enquanto o cliente nao pedir para sair do server
+        nread = read(fd, buffer, BUF_SIZE); // le o menu
         buffer[nread] = '\0';
-        printf("%s\n", buffer);
-        scanf("%s", acao);
-        write(fd, acao, BUF_SIZE);
-        if(strcmp(acao,"1")==0){
+        printf("%s\n", buffer);//print do menu no cliente
+        scanf("%s", acao); //scan da ação pretendida no menu
+        write(fd, acao, BUF_SIZE); //envia a ação pretendido.
+        if(strcmp(acao,"1")==0){ //informações pessoais
             system("clear");
-            while(!(strcmp(acao,"11")==0)){
-                nread = read(fd, buffer, BUF_SIZE);
+            while(!(strcmp(acao,"11")==0)){ //enquanto nao pedir para sair do sub-menu das informaçoes do cliente
+                nread = read(fd, buffer, BUF_SIZE); //le o sub-menu
                 buffer[nread] = '\0';
-                printf("%s\n", buffer);
-                scanf("%s", acao);
-                write(fd, acao, BUF_SIZE);
-                nread = read(fd, buffer, BUF_SIZE);
+                printf("%s\n", buffer); //print do sub-menu no cliente
+                scanf("%s", acao); //scan da ação pretendida no sub-menu
+                write(fd, acao, BUF_SIZE); //envia o que se pretende fazer
+                nread = read(fd, buffer, BUF_SIZE); //le a informação pessoal pretendida
                 buffer[nread] = '\0';
                 system("clear");
-                printf("%s\n", buffer);
+                printf("%s\n", buffer); //print da informação no cliente
             }
-        } else if(strcmp(acao,"2")==0){
+        } else if(strcmp(acao,"2")==0){ //informações do grupo
             system("clear");
-            while(!(strcmp(acao,"8")==0)){
-                nread = read(fd, buffer, BUF_SIZE);
+            while(!(strcmp(acao,"8")==0)){ //enquanto nao pedir para sair do sub-menu das informações do grupo
+                nread = read(fd, buffer, BUF_SIZE); //le o sub-menu
                 buffer[nread] = '\0';
-                printf("%s\n", buffer);
-                scanf("%s", acao);
-                write(fd, acao, BUF_SIZE);
-                nread = read(fd, buffer, BUF_SIZE);
+                printf("%s\n", buffer); //print do sub-menu no cliente
+                scanf("%s", acao); //scan da ação pretendida
+                write(fd, acao, BUF_SIZE); //envia o que se pretende fazer
+                nread = read(fd, buffer, BUF_SIZE); //le a informação do grupo pretendida
                 buffer[nread] = '\0';
                 system("clear");
-                printf("%s\n", buffer);
+                printf("%s\n", buffer); //print da informação no cliente
             }
-        } else if(strcmp(acao,"3")==0){
+        } else if(strcmp(acao,"3")==0){ //Subscrições
             system("clear");
-            while(!(strcmp(acao,"8")==0)){
-                nread = read(fd, buffer, BUF_SIZE);
+            while(!(strcmp(acao,"8")==0)){ //enquanto nao pedir para sair do sub-menu das subscrições
+                nread = read(fd, buffer, BUF_SIZE); // le o sub-menu
                 buffer[nread] = '\0';
-                printf("%s\n", buffer);
-                scanf("%s", acao);
-                write(fd, acao, BUF_SIZE);
-                nread = read(fd, buffer, BUF_SIZE);
+                printf("%s\n", buffer); //print do sub-menu no cliente
+                scanf("%s", acao); //scan da informação a que se quer subscrever
+                write(fd, acao, BUF_SIZE); //envia a que informação se quer subscrever
+                nread = read(fd, buffer, BUF_SIZE); //le a resposta do servidor
                 buffer[nread] = '\0';
                 system("clear");
-                printf("%s\n", buffer);
+                printf("%s\n", buffer); //print se esta subscrito ou se deixou de estar subscrito
             }
-        } else if(strcmp(acao,"4")==0){
+        } else if(strcmp(acao,"4")==0){ //sai do servidor
             printf("\n");
-        } else if(strcmp(acao,"5")==0){
-            nread = read(fd, buffer, BUF_SIZE);
+        } else{ //nao foi enviada nenhuma das ações que estão no menu
+            nread = read(fd, buffer, BUF_SIZE); //le que tem de enviar uma das opções do menu
             buffer[nread] = '\0';
             system("clear");
-            printf("%s\n", buffer);
-        } else{
-            nread = read(fd, buffer, BUF_SIZE);
-            buffer[nread] = '\0';
-            system("clear");
-            printf("%s\n", buffer);
+            printf("%s\n", buffer); //print dessa informação no cliente
         }
     }
     system("clear");
     printf("\nFechando conexão com o servidor...\n");
-    done=1;
-    pthread_join(my_thread,NULL);
-    close(fd);
-    exit(0);
+    done=1; //para fechar o thread do cliente
+    pthread_join(my_thread,NULL); //fica a espera que ele termine
+    close(fd); //fecha o socket
+    exit(0); // termina o programa
 }
 
 
